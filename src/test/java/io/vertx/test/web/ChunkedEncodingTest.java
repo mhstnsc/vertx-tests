@@ -1,7 +1,5 @@
-package io.vertx.test;
+package io.vertx.test.web;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.net.NetClient;
@@ -14,10 +12,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
+
+import static io.vertx.test.testutils.AwaitUtils.awaitResult;
 
 
 public class ChunkedEncodingTest extends VertxTestBase
@@ -96,18 +93,5 @@ public class ChunkedEncodingTest extends VertxTestBase
 
         String requestBodyData = requestBody.get(5, TimeUnit.SECONDS);
         assertEquals("buggy not", requestBodyData);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T awaitResult(Consumer<Handler<AsyncResult<T>>> consumer) throws InterruptedException, ExecutionException, TimeoutException {
-        CompletableFuture future = new CompletableFuture();
-        consumer.accept((h) -> {
-            if(h.succeeded()) {
-                future.complete(h.result());
-            } else {
-                future.completeExceptionally(h.cause());
-            }
-        });
-        return (T) future.get(10000, TimeUnit.MILLISECONDS);
     }
 }
