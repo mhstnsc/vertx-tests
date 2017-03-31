@@ -64,6 +64,8 @@ public class MaxRateExecutor
                             vertx.deployVerticle(
                                     new AbstractVerticle()
                                     {
+                                        boolean executing;
+
                                         @Override
                                         public void start(Future<Void> startFuture) throws Exception
                                         {
@@ -82,13 +84,24 @@ public class MaxRateExecutor
 
                                         private void doRequest()
                                         {
+                                            executing = true;
                                             testedCode.run(
                                                     () ->
                                                     {
                                                         intervalRequestCounter.incrementAndGet();
-                                                        doRequest();
+                                                        if(executing)
+                                                        {
+                                                            Vertx.currentContext().runOnContext(
+                                                                    event -> doRequest()
+                                                            );
+                                                        }
+                                                        else
+                                                        {
+                                                            doRequest();
+                                                        }
                                                     }
                                             );
+                                            executing = false;
                                         }
                                     },
                                     new DeploymentOptions().setWorker(deployType==DeployType.Blocking),
