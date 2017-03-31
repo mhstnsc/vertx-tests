@@ -68,6 +68,8 @@ public class EventBusTest extends TestBase
             );
         }
 
+        byte[] payload = new byte[16];
+
         for (int i = 0; i < numberOfSenderVerticles; i++)
         {
             String id = awaitResult(
@@ -86,11 +88,64 @@ public class EventBusTest extends TestBase
                                 {
                                     vertx.eventBus().send(
                                             address,
-                                            new byte[16],
+                                            payload,
                                             event ->
                                             {
                                                 doSend();
                                             }
+                                    );
+                                }
+                            },
+                            new DeploymentOptions(),
+                            h
+                    )
+            );
+        }
+
+        Thread.sleep(10000);
+
+        displayThreadInfo(threadMXBean);
+    }
+
+
+    /**
+     * Send and reply between verticles as fast as possible and measure rate
+     */
+    @Test
+    public void testSendToItself() throws Exception
+    {
+        String consumerAddress = "testSendAndReply.consumerAddress";
+        int numberOfVerticles = 32;
+
+        // deploy the consumers
+
+        byte[] payload = new byte[16];
+
+        for (int i = 0; i < numberOfVerticles; i++)
+        {
+            String id = awaitResult(
+                    h -> vertx.deployVerticle(
+                            new AbstractVerticle()
+                            {
+                                @Override
+                                public void start(Future<Void> startFuture) throws Exception
+                                {
+                                    vertx.eventBus().consumer(
+                                            consumerAddress,
+                                            event ->
+                                            {
+                                                vertx.eventBus().send(
+                                                        consumerAddress,
+                                                        payload
+                                                );
+                                            }
+                                    ).completionHandler(
+                                            startFuture.completer()
+                                    );
+
+                                    vertx.eventBus().send(
+                                            consumerAddress,
+                                            payload
                                     );
                                 }
                             },
