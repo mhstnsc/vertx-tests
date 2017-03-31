@@ -31,7 +31,7 @@ public class MaxRateExecutor
         void run(Runnable finished);
     }
 
-    public enum ClientType
+    public enum DeployType
     {
         Async,
         Blocking
@@ -40,6 +40,7 @@ public class MaxRateExecutor
     public void start(
             Vertx vertx,
             int numberOfInstances,
+            DeployType deployType,
             Supplier<TestedCode> testedCodeSupplier
     ) throws Exception
     {
@@ -70,8 +71,10 @@ public class MaxRateExecutor
                                                     Future.<Void>future().setHandler(
                                                             event ->
                                                             {
-                                                                doRequest();
                                                                 startFuture.complete();
+                                                                Vertx.currentContext().runOnContext(
+                                                                        event1 -> doRequest()
+                                                                );
                                                             }
                                                     )
                                             );
@@ -88,7 +91,7 @@ public class MaxRateExecutor
                                             );
                                         }
                                     },
-                                    new DeploymentOptions(),
+                                    new DeploymentOptions().setWorker(deployType==DeployType.Blocking),
                                     asyncResultHandler
                             )
             );

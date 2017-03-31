@@ -1,13 +1,15 @@
 package io.vertx.test.performance;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
-import io.vertx.core.VertxOptions;
+import com.hazelcast.util.MD5Util;
+import io.vertx.core.*;
 import io.vertx.test.testutils.MaxRateExecutor;
 import io.vertx.test.testutils.TestBase;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.security.MessageDigest;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static io.vertx.test.testutils.AwaitUtils.awaitResult;
 import static org.junit.Assert.assertTrue;
@@ -70,6 +72,7 @@ public class EventBusTest extends TestBase
                        .start(
                                vertx,
                                numberOfSenders,
+                               MaxRateExecutor.DeployType.Async,
                                () -> new MaxRateExecutor.TestedCode()
                                {
                                    @Override
@@ -90,6 +93,48 @@ public class EventBusTest extends TestBase
                                                    finished.run();
                                                }
                                        );
+                                   }
+                               }
+                       );
+
+        Thread.sleep(200000);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testMaxCpuLoad() throws Exception
+    {
+        String address = "testWorkerConsumer";
+        int numberOfConsumers = 200;
+        int numberOfSenders = 200;
+        boolean useWorkerConsumers = true;
+
+
+        AtomicLong atomicLong = new AtomicLong();
+
+        MaxRateExecutor.create()
+                       .start(
+                               vertx,
+                               numberOfSenders,
+                               MaxRateExecutor.DeployType.Blocking,
+                               () -> new MaxRateExecutor.TestedCode()
+                               {
+                                   @Override
+                                   public void init(Future<Void> future)
+                                   {
+                                       future.complete();
+                                   }
+
+                                   @Override
+                                   public void run(Runnable finished)
+                                   {
+                                       byte[] data = new byte[1024];
+                                       atomicLong.set(MD5Util.toMD5String(new String(data)).length());
+
+                                       Vertx.currentContext().runOnContext(
+                                               event -> finished.run()
+                                       );
+
                                    }
                                }
                        );
