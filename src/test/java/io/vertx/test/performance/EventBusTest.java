@@ -131,10 +131,7 @@ public class EventBusTest extends TestBase
                                        byte[] data = new byte[1024];
                                        atomicLong.set(MD5Util.toMD5String(new String(data)).length());
 
-                                       Vertx.currentContext().runOnContext(
-                                               event -> finished.run()
-                                       );
-
+                                       finished.run();
                                    }
                                }
                        );
