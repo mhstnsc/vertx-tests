@@ -20,16 +20,18 @@ public class WorkerVerticle extends AbstractVerticle
         logger.debug("{} {}", Thread.currentThread(), Vertx.currentContext());
 
         Context expectedContext = Vertx.currentContext();
-        assertTrue(Context.isOnWorkerThread());
+        //assertTrue(Context.isOnWorkerThread());
 
         vertx.eventBus().send(
                 "bla",
                 new byte[0],
                 event ->
                 {
+                    new Throwable().printStackTrace();
+
+                    logger.debug("{} {}", Thread.currentThread(), Vertx.currentContext(), event.cause());
                     assertEquals(expectedContext, Vertx.currentContext());
-                    assertTrue(Context.isOnWorkerThread());
-                    logger.debug("{} {} {}", Thread.currentThread(), Vertx.currentContext(), event.cause());
+//                    assertTrue(Context.isOnWorkerThread());
                 }
         );
     }
