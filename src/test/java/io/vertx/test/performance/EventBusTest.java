@@ -26,6 +26,10 @@ public class EventBusTest extends TestBase
         );
     }
 
+    /**
+     * Send and reply between verticles as fast as possible and measure rate
+     *
+     */
     @SuppressWarnings("ConstantConditions")
     @Test
     public void testWorkerConsumer() throws Exception
