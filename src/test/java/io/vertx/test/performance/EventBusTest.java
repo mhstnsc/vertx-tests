@@ -1,52 +1,54 @@
 package io.vertx.test.performance;
 
-import com.hazelcast.util.MD5Util;
 import io.vertx.core.*;
-import io.vertx.test.testutils.MaxRateExecutor;
 import io.vertx.test.testutils.TestBase;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.security.MessageDigest;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicLong;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.vertx.test.testutils.AwaitUtils.awaitResult;
-import static org.junit.Assert.assertTrue;
 
 
 @SuppressWarnings("unused")
 public class EventBusTest extends TestBase
 {
+    ThreadMXBean threadMXBean;
+
     @Before
     public void setup() throws Exception
     {
-        startVertx(new VertxOptions()
-                .setWorkerPoolSize(400)
-                .setInternalBlockingPoolSize(400)
-                .setEventLoopPoolSize(4 * Runtime.getRuntime().availableProcessors())
+        vertx = awaitResult(
+                h -> Vertx.clusteredVertx(
+                        new VertxOptions(),
+                        h
+                )
         );
+
+        threadMXBean = ManagementFactory.getThreadMXBean();
+        threadMXBean.setThreadContentionMonitoringEnabled(true);
     }
 
     /**
      * Send and reply between verticles as fast as possible and measure rate
-     *
      */
-    @SuppressWarnings("ConstantConditions")
     @Test
-    public void testWorkerConsumer() throws Exception
+    public void testSendAndReply() throws Exception
     {
-        String address = "testWorkerConsumer";
-        int numberOfConsumers = 200;
-        int numberOfSenders = 2000;
-        boolean useWorkerConsumers = true;
+        String address = "testSendAndReply";
+        int numberOfConsumerVerticles = 32;
+        int numberOfSenderVerticles = 32;
 
         // deploy the consumers
 
-        for(int i=0; i< numberOfConsumers; i++)
+        for (int i = 0; i < numberOfConsumerVerticles; i++)
         {
             String id = awaitResult(
-                    h-> vertx.deployVerticle(
+                    h -> vertx.deployVerticle(
                             new AbstractVerticle()
                             {
                                 @Override
@@ -60,82 +62,113 @@ public class EventBusTest extends TestBase
                                     );
                                 }
                             },
-                            new DeploymentOptions().setWorker(useWorkerConsumers),
+                            new DeploymentOptions(),
                             h
                     )
             );
         }
 
-        // deploy the senders and start generating traffic at maximum speed
+        for (int i = 0; i < numberOfSenderVerticles; i++)
+        {
+            String id = awaitResult(
+                    h -> vertx.deployVerticle(
+                            new AbstractVerticle()
+                            {
+                                @Override
+                                public void start(Future<Void> startFuture) throws Exception
+                                {
+                                    startFuture.complete();
 
-        MaxRateExecutor.create()
-                       .start(
-                               vertx,
-                               numberOfSenders,
-                               MaxRateExecutor.DeployType.Async,
-                               () -> new MaxRateExecutor.TestedCode()
-                               {
-                                   @Override
-                                   public void init(Future<Void> future)
-                                   {
-                                       future.complete();
-                                   }
+                                    doSend();
+                                }
 
-                                   @Override
-                                   public void run(Runnable finished)
-                                   {
-                                       vertx.eventBus().send(
-                                               address,
-                                               new byte[16],
-                                               event ->
-                                               {
-                                                   assertTrue(event.succeeded());
-                                                   finished.run();
-                                               }
-                                       );
-                                   }
-                               }
-                       );
+                                private void doSend()
+                                {
+                                    vertx.eventBus().send(
+                                            address,
+                                            new byte[16],
+                                            event ->
+                                            {
+                                                doSend();
+                                            }
+                                    );
+                                }
+                            },
+                            new DeploymentOptions(),
+                            h
+                    )
+            );
+        }
 
-        Thread.sleep(200000);
+        Thread.sleep(10000);
+
+        displayThreadInfo(threadMXBean);
     }
 
-    @SuppressWarnings("ConstantConditions")
+    /**
+     * Use runOnContext to execute an empty function => loads 100% CPU
+     *
+     * @throws Exception
+     */
     @Test
-    public void testMaxCpuLoad() throws Exception
+    public void testRunOnContext() throws Exception
     {
-        String address = "testWorkerConsumer";
-        int numberOfConsumers = 200;
-        int numberOfSenders = 200;
-        boolean useWorkerConsumers = true;
+        String address = "testRunOnContext";
+        int numberOfVerticles = 32;
 
+        for (int i = 0; i < numberOfVerticles; i++)
+        {
+            String id = awaitResult(
+                    h -> vertx.deployVerticle(
+                            new AbstractVerticle()
+                            {
+                                @Override
+                                public void start(Future<Void> startFuture) throws Exception
+                                {
+                                    startFuture.complete();
+                                    doRunOnContext();
+                                }
 
-        AtomicLong atomicLong = new AtomicLong();
+                                private void doRunOnContext()
+                                {
+                                    Vertx.currentContext().runOnContext(
+                                            event ->
+                                            {
+                                                doRunOnContext();
+                                            }
+                                    );
+                                }
+                            },
+                            new DeploymentOptions(),
+                            h
+                    )
+            );
+        }
 
-        MaxRateExecutor.create()
-                       .start(
-                               vertx,
-                               numberOfSenders,
-                               MaxRateExecutor.DeployType.Blocking,
-                               () -> new MaxRateExecutor.TestedCode()
-                               {
-                                   @Override
-                                   public void init(Future<Void> future)
-                                   {
-                                       future.complete();
-                                   }
+        Thread.sleep(10000);
 
-                                   @Override
-                                   public void run(Runnable finished)
-                                   {
-                                       byte[] data = new byte[1024];
-                                       atomicLong.set(MD5Util.toMD5String(new String(data)).length());
+        displayThreadInfo(threadMXBean);
+    }
 
-                                       finished.run();
-                                   }
-                               }
-                       );
+    private void displayThreadInfo(ThreadMXBean threadMXBean)
+    {
+        List<Thread> threadIds = Thread.getAllStackTraces()
+                                       .keySet()
+                                       .stream()
+                                       .filter(
+                                               thread -> thread.getName().contains("vert.x-eventloop-thread")
+                                       )
+                                       .collect(Collectors.toList());
 
-        Thread.sleep(200000);
+        for (Thread thread : threadIds)
+        {
+            ThreadInfo threadInfo = threadMXBean.getThreadInfo(thread.getId());
+
+            System.out.println(String.format("ThreadInfo:%40s getBlockedTime:%5d msec getWaitedTime:%3d ",
+                    thread.getName(),
+                    threadInfo.getBlockedTime(),
+                    threadInfo.getWaitedTime()
+            ));
+        }
     }
 }
