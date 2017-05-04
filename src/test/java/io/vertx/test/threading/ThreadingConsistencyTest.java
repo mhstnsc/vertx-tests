@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static io.vertx.test.testutils.AwaitUtils.awaitResult;
+import static io.mstnsc.vertx.test.AwaitUtils.awaitResult;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

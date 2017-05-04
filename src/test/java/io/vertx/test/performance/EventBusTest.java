@@ -11,7 +11,7 @@ import java.lang.management.ThreadMXBean;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.vertx.test.testutils.AwaitUtils.awaitResult;
+import static io.mstnsc.vertx.test.AwaitUtils.awaitResult;
 
 
 @SuppressWarnings("unused")

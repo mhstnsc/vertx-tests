@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static io.vertx.test.testutils.AwaitUtils.awaitResult;
+import static io.mstnsc.vertx.test.AwaitUtils.awaitResult;
 
 
 public class ChunkedEncodingTest extends VertxTestBase
