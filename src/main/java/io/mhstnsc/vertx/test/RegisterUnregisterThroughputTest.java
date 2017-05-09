@@ -1,4 +1,4 @@
-package io.mstnsc.vertx.test;
+package io.mhstnsc.vertx.test;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
@@ -9,7 +9,7 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static io.mstnsc.vertx.test.AwaitUtils.awaitResult;
+import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
 
 
 /**
@@ -18,6 +18,10 @@ import static io.mstnsc.vertx.test.AwaitUtils.awaitResult;
  *  - register a handler for an address
  *  - when registration finished then unregister the address
  *  - when unregistration finished then repeat
+ *
+ *  To run:
+ *  gradle shadowJar
+ *  java -cp ./build/libs/vertx-tests-0.0.1-SNAPSHOT-fat.jar io.mhstnsc.vertx.test.RegisterUnregisterThroughputTest
  */
 public class RegisterUnregisterThroughputTest
 {

@@ -1,6 +1,6 @@
 package io.vertx.test.testutils;
 
-import io.mstnsc.vertx.test.AwaitUtils;
+import io.mhstnsc.vertx.test.AwaitUtils;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;

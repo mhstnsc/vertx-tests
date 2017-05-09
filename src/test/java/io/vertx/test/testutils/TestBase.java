@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
-import static io.mstnsc.vertx.test.AwaitUtils.awaitResult;
+import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
 
 
 public class TestBase
