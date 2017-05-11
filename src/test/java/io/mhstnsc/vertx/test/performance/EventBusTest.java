@@ -1,7 +1,7 @@
-package io.vertx.test.performance;
+package io.mhstnsc.vertx.test.performance;
 
 import io.vertx.core.*;
-import io.vertx.test.testutils.TestBase;
+import io.mhstnsc.vertx.test.testutils.TestBase;
 import org.junit.Before;
 import org.junit.Test;
 

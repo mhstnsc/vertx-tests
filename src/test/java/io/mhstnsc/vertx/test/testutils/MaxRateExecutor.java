@@ -1,4 +1,4 @@
-package io.vertx.test.testutils;
+package io.mhstnsc.vertx.test.testutils;
 
 import io.mhstnsc.vertx.test.AwaitUtils;
 import io.vertx.core.AbstractVerticle;

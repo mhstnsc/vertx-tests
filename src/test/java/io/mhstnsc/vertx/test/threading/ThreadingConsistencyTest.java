@@ -1,4 +1,4 @@
-package io.vertx.test.threading;
+package io.mhstnsc.vertx.test.threading;
 
 import io.vertx.core.*;
 import io.vertx.core.eventbus.DeliveryOptions;

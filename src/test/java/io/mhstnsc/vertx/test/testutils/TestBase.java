@@ -1,4 +1,4 @@
-package io.vertx.test.testutils;
+package io.mhstnsc.vertx.test.testutils;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;

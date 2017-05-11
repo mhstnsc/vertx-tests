@@ -1,4 +1,4 @@
-package io.vertx.test.web;
+package io.mhstnsc.vertx.test.web;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
