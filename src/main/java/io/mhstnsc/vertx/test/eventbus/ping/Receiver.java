@@ -1,16 +1,14 @@
-package io.mhstnsc.vertx.test.ping;
+package io.mhstnsc.vertx.test.eventbus.ping;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
+import static io.mhstnsc.vertx.test.utils.AwaitUtils.awaitResult;
 
 
 public class Receiver

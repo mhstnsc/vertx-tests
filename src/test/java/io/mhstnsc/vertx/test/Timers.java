@@ -1,11 +1,10 @@
 package io.mhstnsc.vertx.test;
 
-import io.mhstnsc.vertx.test.testutils.TestBase;
+import io.mhstnsc.vertx.test.core.TestBase;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import org.junit.Test;
 
-import java.util.Timer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 

@@ -1,4 +1,4 @@
-package io.mhstnsc.vertx.test;
+package io.mhstnsc.vertx.test.utils;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;

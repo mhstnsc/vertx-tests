@@ -1,4 +1,4 @@
-package io.mhstnsc.vertx.test;
+package io.mhstnsc.vertx.test.eventbus;
 
 import com.hazelcast.config.Config;
 import io.vertx.core.*;
@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
+import static io.mhstnsc.vertx.test.utils.AwaitUtils.awaitResult;
 
 
-public class SendToItself
+public class SendToItselfBenchmark
 {
     static ThreadMXBean threadMXBean;
 

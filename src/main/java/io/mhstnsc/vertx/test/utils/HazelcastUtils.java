@@ -1,4 +1,4 @@
-package io.mhstnsc.vertx.test.testutils;
+package io.mhstnsc.vertx.test.utils;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;

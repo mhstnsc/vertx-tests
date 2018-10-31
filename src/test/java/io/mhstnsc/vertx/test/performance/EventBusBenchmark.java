@@ -1,8 +1,7 @@
 package io.mhstnsc.vertx.test.performance;
 
 import io.vertx.core.*;
-import io.mhstnsc.vertx.test.testutils.TestBase;
-import org.junit.Before;
+import io.mhstnsc.vertx.test.core.TestBase;
 import org.junit.Test;
 
 import java.lang.management.ManagementFactory;
@@ -11,24 +10,17 @@ import java.lang.management.ThreadMXBean;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
+import static io.mhstnsc.vertx.test.utils.AwaitUtils.awaitResult;
 
 
 @SuppressWarnings("unused")
-public class EventBusTest extends TestBase
+public class EventBusBenchmark extends TestBase
 {
     ThreadMXBean threadMXBean;
 
-    @Before
+    @Override
     public void setup() throws Exception
     {
-        vertx = awaitResult(
-                h -> Vertx.clusteredVertx(
-                        new VertxOptions(),
-                        h
-                )
-        );
-
         threadMXBean = ManagementFactory.getThreadMXBean();
         threadMXBean.setThreadContentionMonitoringEnabled(true);
     }

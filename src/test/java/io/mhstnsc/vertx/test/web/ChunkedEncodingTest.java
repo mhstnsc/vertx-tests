@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
+import static io.mhstnsc.vertx.test.utils.AwaitUtils.awaitResult;
 
 
 public class ChunkedEncodingTest extends VertxTestBase
@@ -47,7 +47,7 @@ public class ChunkedEncodingTest extends VertxTestBase
                         .setLogActivity(true)
         );
 
-        NetSocket socket = awaitResult(
+        NetSocket clientSocket = awaitResult(
                 asyncResultHandler ->
                         netClient.connect(
                                 8081,
@@ -62,10 +62,12 @@ public class ChunkedEncodingTest extends VertxTestBase
                         "Connection: close\r\n" +
                         "\r\n" +
                         "5\r\n" +
-                        "buggy\r\n" +
-                        "4" + // malformed here (missing \r\n)
+                        "buggy\r\n"+
+                        "4\r\n" + // malformed here (missing \r\n)
                         " not\r\n" +
-                        "\r\n";
+                        "0\r\n" +
+                        "\r\n"
+                        ;
 
         CompletableFuture<String> requestBody = new CompletableFuture<>();
 
@@ -81,13 +83,13 @@ public class ChunkedEncodingTest extends VertxTestBase
 
         CompletableFuture<Void> responseEnd = new CompletableFuture<>();
 
-        socket.write(Buffer.buffer(httpRequest.getBytes()));
+        clientSocket.write(Buffer.buffer(httpRequest.getBytes()));
 //        socket.handler(event ->
 //                {
 //                    response.appendBuffer(event);
 //                }
 //        );
-        socket.endHandler(event -> responseEnd.complete(null));
+        clientSocket.endHandler(event -> responseEnd.complete(null));
 
         responseEnd.get(5, TimeUnit.SECONDS);
 

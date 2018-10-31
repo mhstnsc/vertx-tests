@@ -1,16 +1,15 @@
-package io.mhstnsc.vertx.test.testutils;
+package io.mhstnsc.vertx.test.core;
 
+import com.hazelcast.core.HazelcastInstance;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import org.junit.After;
 import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
-import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
+import static io.mhstnsc.vertx.test.utils.AwaitUtils.awaitResult;
 
 
 public class TestBase
@@ -18,6 +17,9 @@ public class TestBase
     private CompletableFuture<AssertionError> assertions = new CompletableFuture<>();
 
     private boolean useClusteredVertx;
+
+    protected HazelcastClusterManager clusterManager;
+    protected HazelcastInstance hazelcastInstance;
 
     protected Vertx vertx;
 
@@ -36,9 +38,14 @@ public class TestBase
     {
         if(useClusteredVertx)
         {
-            VertxOptions vertxOptions = new VertxOptions()
-                    .setClustered(true)
-                    .setClusterManager(new HazelcastClusterManager());
+            clusterManager = new HazelcastClusterManager();
+
+            VertxOptions vertxOptions = buildVertxOptions(
+                    new VertxOptions()
+                            .setClustered(true)
+                            .setClusterManager(clusterManager)
+            );
+
 
             vertx = awaitResult(
                     h -> Vertx.clusteredVertx(
@@ -46,6 +53,8 @@ public class TestBase
                             h
                     )
             );
+
+            hazelcastInstance = clusterManager.getHazelcastInstance();
         }
         else
         {
@@ -59,6 +68,11 @@ public class TestBase
                     assertions.complete((AssertionError) event);
                 }
         );
+    }
+
+    protected VertxOptions buildVertxOptions(VertxOptions options)
+    {
+        return options;
     }
 
     @After

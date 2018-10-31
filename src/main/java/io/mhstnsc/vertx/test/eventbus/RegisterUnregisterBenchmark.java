@@ -1,4 +1,4 @@
-package io.mhstnsc.vertx.test;
+package io.mhstnsc.vertx.test.eventbus;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
@@ -9,7 +9,7 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
+import static io.mhstnsc.vertx.test.utils.AwaitUtils.awaitResult;
 
 
 /**
@@ -23,7 +23,7 @@ import static io.mhstnsc.vertx.test.AwaitUtils.awaitResult;
  *  gradle shadowJar
  *  java -cp ./build/libs/vertx-tests-0.0.1-SNAPSHOT-fat.jar io.mhstnsc.vertx.test.RegisterUnregisterThroughputTest
  */
-public class RegisterUnregisterThroughputTest
+public class RegisterUnregisterBenchmark
 {
     static Vertx vertx;
     static final int numberOfVerticles = 200;  // number of verticles which create load
